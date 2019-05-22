@@ -36,15 +36,49 @@ def plot_edges(edges, x, y):
     plt.show()
 
 
-def plot_cities(cities, length):
+def plot_cities(cities, fitness, filename=None):
     n = len(cities)
     plt.title('Общий путь-%s. Всего городов -%i.' % (
-        round(length, 3), n), size=14)
+        round(fitness, 3), n - 1), size=14)
     x1 = [cities[i].x for i in np.arange(0, n, 1)]
     y1 = [cities[i].y for i in np.arange(0, n, 1)]
     plt.plot(x1, y1, color='r', linestyle=' ', marker='o')
     plt.plot(x1, y1, color='b', linewidth=1)
-    plt.plot(x1[n - 2], y1[n - 2], color='b', linestyle=' ', marker='o', label='Конечный город')
-    plt.plot(x1[0], y1[0], color='y', linestyle=' ', marker='o', label='Начальный город')
+    end, = plt.plot(x1[n - 2], y1[n - 2], color='b', linestyle=' ', marker='o', label='Конечный город')
+    start, = plt.plot(x1[0], y1[0], color='y', linestyle=' ', marker='o', label='Начальный город')
+    plt.legend(handles=[start, end], loc=3)
     plt.grid(True)
-    plt.show()
+    if filename:
+        plt.savefig(filename)
+        plt.close()
+    else:
+        plt.show()
+
+
+def plot_anneal(path, cities, fitness, filename=None):
+    x = []
+    y = []
+    for i in path[0]:
+        x.append(cities[i].x)
+        y.append(cities[i].y)
+
+    n = len(cities)
+    plt.title('Общий путь-%s. Всего городов -%i.' % (
+        round(fitness, 3), n - 1), size=14)
+
+    plt.plot(x, y, color='r', linestyle=' ', marker='o')
+
+    plt.plot(x, y, color='b', linewidth=1)
+
+    plt.plot([x[-1], x[0]], [y[-1], y[0]], color='b', linewidth=1)
+
+    end, = plt.plot(x[len(x) - 1], y[len(y) - 1], color='b', linestyle=' ', marker='o', label='Конечный город')
+    start, = plt.plot(x[0], y[0], color='y', linestyle=' ', marker='o', label='Начальный город')
+
+    plt.legend(handles=[start, end], loc=3)
+    plt.grid(True)
+    if filename:
+        plt.savefig(filename)
+        plt.close()
+    else:
+        plt.show()

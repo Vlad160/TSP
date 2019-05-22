@@ -5,14 +5,14 @@ import time
 list_of_cities = []
 
 # probability that an individual Route will mutate
-k_mut_prob = 0.4
+k_mut_prob = 0.30
 
-k_n_generations = 200
+k_n_generations = 550
 # Population size of 1 generation (RoutePop)
-k_population_size = 150
+k_population_size = 170
 
 # Size of the tournament selection. 
-tournament_size = 7
+tournament_size = 8
 
 # If elitism is True, the best from one generation will carried over to the next.
 elitism = True
@@ -211,6 +211,8 @@ class App(object):
 
 
 def random_cities(cities):
+    global list_of_cities
+    list_of_cities = []
     for city in cities:
         list_of_cities.append(city)
     # create and run an application instance:

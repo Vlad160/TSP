@@ -18,3 +18,6 @@ class City(object):
 
     def point_dist(self, x1, y1, x2, y2):
         return np.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
+    def __str__(self):
+        return '{} {} {}'.format(self.name, self.x, self.y)

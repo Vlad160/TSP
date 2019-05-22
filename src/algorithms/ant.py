@@ -1,28 +1,13 @@
-# -*- coding: utf8 -*-
-#
-# Ant Algorithm Demonstration
-#
-# Задача коммивожера
-# Алгоритм муравья
-
-from math import sqrt
-from random import random
-import matplotlib.lines as lines
-import matplotlib.pyplot as plt
 import numpy as np
+from random import random, choice
 
-from src.models.City import City
-
-MAX_CITIES = 15
-MAX_DISTANCE = 1
-MAX_TIME = 500 * MAX_CITIES
-INIT_PHEROMONE = 1.0 / MAX_CITIES
-
-MAX_ANTS = MAX_CITIES * MAX_CITIES
+MAX_TIME = float('inf')
+MAX_ANTS = float('inf')
 ALPHA = 1  # вес фермента
 BETA = 5  # коэффициент эвристики, влияние априорных знаний(1/d, где d - растояние)
 RHO = .5  # Интенсивность. Коф. испарение равен 1 - RHO. По результатам тестов лучше использовать >= 0.5
 QVAL = 100  # Кол. феромонов на один проход
+PR = 0.01  # probability of pure random selection of the next town
 
 
 class Ant(object):
@@ -33,7 +18,6 @@ class Ant(object):
         self.tour_length = 0.
 
     def move_to_city(self, city):
-        global DISTANCE, MAX_CITIES
         self.path.append(city)
         self.tour_length += DISTANCE[self.cur_city][city]
         if len(self.path) == MAX_CITIES:
@@ -67,32 +51,23 @@ ANTS = []  # [MAX_ANTS]
 CITIES = []  # [MAX_CITIES]
 DISTANCE = []  # [MAX_CITIES][MAX_CITIES]
 PHEROMONE = []  # [MAX_CITIES][MAX_CITIES]
-BEST = MAX_CITIES * MAX_DISTANCE
+BEST = float('inf')
 BEST_ANT = None
 
 
-def init():
-    global DISTANCE, PHEROMONE, CITIES, ANTS
+def init(cities, distance_matrix):
+    global DISTANCE, PHEROMONE, CITIES, ANTS, MAX_CITIES, MAX_TIME, MAX_ANTS
+    MAX_CITIES = len(cities)
+    MAX_TIME = 500 * MAX_CITIES
+    MAX_ANTS = MAX_CITIES * MAX_CITIES
+    init_pheromone = 1.0 / MAX_CITIES
+    PHEROMONE = np.full((MAX_CITIES, MAX_CITIES), init_pheromone)
 
-    for i in range(MAX_CITIES):
-        DISTANCE.append([0.] * MAX_CITIES)
-        PHEROMONE.append([INIT_PHEROMONE] * MAX_CITIES)
+    CITIES = cities
+    DISTANCE = distance_matrix
 
-    for i in range(MAX_CITIES):
-        CITIES.append(City('name', random() * MAX_DISTANCE, random() * MAX_DISTANCE))
-
-    # calculate distance
-    for i in range(MAX_CITIES):
-        for j in range(MAX_CITIES):
-            if i != j and DISTANCE[i][j] == 0.:
-                xd = CITIES[i].x - CITIES[j].x
-                yd = CITIES[i].y - CITIES[j].y
-                distance = sqrt(xd * xd + yd * yd)
-                DISTANCE[i][j], DISTANCE[j][i] = distance, distance
-
-    # create ants
     to = 0
-    for i in range(MAX_ANTS):
+    for _ in np.arange(0, MAX_ANTS, 1):
         ANTS.append(Ant(to))
         to += 1
         to = to % MAX_CITIES
@@ -110,37 +85,21 @@ def select_next_city(ant):
     denom = 0.
     not_visited = []
 
-    for to in range(MAX_CITIES):
+    for to in np.arange(0, MAX_CITIES, 1):
         if to not in ant.path:
             ap = ant_product(ant.cur_city, to)
             not_visited.append((to, ap))
             denom += ap
-
-    assert not_visited
+    r = random()
     not_visited = [(val, ap / denom) for (val, ap) in not_visited]
+    if r < PR:
+        to = choice(not_visited)
+        return to[0]
     to = get_random(not_visited)
-    return to
-    i = 0
-    while True:
-        to, ap = not_visited[i]
-        p = ap / denom
-        if random() < p:
-            break
-        i += 1
-        i = i % len(not_visited)
-
-    if False and len(not_visited) == MAX_CITIES - 1:
-        for to_city, ap in not_visited:
-            print(
-                '%i %.03f %.01f %.02f' % (
-                    to_city, PHEROMONE[ant.cur_city][to_city], DISTANCE[ant.cur_city][to_city], ap / denom))
-        print(to, raw_input())
-    assert ant.cur_city != to
     return to
 
 
 def simulate_ants():
-    global ANTS, MAX_CITIES
     moving = 0
 
     for ant in ANTS:
@@ -152,13 +111,12 @@ def simulate_ants():
 
 
 def update_trails():
-    global MAX_CITIES, PHEROMONE, RHO, INIT_PHEROMONE, ANTS
+    global MAX_CITIES, PHEROMONE, RHO, ANTS
 
-    # add new pheromone
     for ant in ANTS:
         pheromove_amount = QVAL / ant.tour_length
 
-        for i in range(MAX_CITIES):
+        for i in np.arange(0, MAX_CITIES, 1):
             if i == MAX_CITIES - 1:
                 from_city = ant.path[i]
                 to_city = ant.path[0]
@@ -184,9 +142,10 @@ def restart_ants():
         to = to % MAX_CITIES
 
 
-if __name__ == '__main__':
-    init()
+def solve(cities, distance_matrix):
+    init(cities, distance_matrix)
     cur_time = 0
+    path = []
     while cur_time < MAX_TIME:
         cur_time += 1
         if cur_time % 100 == 0:
@@ -195,20 +154,6 @@ if __name__ == '__main__':
         if simulate_ants() == 0:
             update_trails()
             cur_time != MAX_TIME and restart_ants()
-
-    # import pprint
-    # pprint.pprint(PHEROMONE)
-
-    x, y = [], []
     for i in BEST_ANT.path:
-        city = CITIES[i]
-        x.append(city.x / float(MAX_DISTANCE))
-        y.append(city.y / float(MAX_DISTANCE))
-
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1)
-    x = np.array(x)
-    y = np.array(y)
-    line = lines.Line2D(x, y, mfc='red', ms=12, marker='o')
-    ax.add_line(line)
-    plt.show()
+        path.append(CITIES[i])
+    return path
