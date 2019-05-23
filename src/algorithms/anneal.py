@@ -46,14 +46,14 @@ class SimAnneal(object):
 
     def dist(self, node_0, node_1):
         """
-        Euclidean distance between two nodes.
+        Эвклидово расстояине между двумя вершинами
         """
         coord_0, coord_1 = self.coords[node_0], self.coords[node_1]
         return math.sqrt((coord_0.x - coord_1.x) ** 2 + (coord_0.y - coord_1.y) ** 2)
 
     def fitness(self, solution):
         """
-        Total distance of the current solution path.
+        Стоимость полученного маршрута
         """
         cur_fit = 0
         for i in range(self.N):
@@ -62,15 +62,15 @@ class SimAnneal(object):
 
     def p_accept(self, candidate_fitness):
         """
-        Probability of accepting if the candidate is worse than current.
-        Depends on the current temperature and difference between candidate and current.
+        Вероятность принятия ухудшаещего решения
+        Зависит от темературы и разницы между решениями
         """
         return math.exp(-abs(candidate_fitness - self.cur_fitness) / self.T)
 
     def accept(self, candidate):
         """
-        Accept with probability 1 if candidate is better than current.
-        Accept with probabilty p_accept(..) if candidate is worse.
+        Принять с вероятностью 1, если полученное решение лучше текщуего
+        Использовать p_accept, если полученное решение хуже
         """
         candidate_fitness = self.fitness(candidate)
         if candidate_fitness < self.cur_fitness:
@@ -83,9 +83,9 @@ class SimAnneal(object):
 
     def anneal(self):
         """
-        Execute simulated annealing algorithm.
+        Входная точка алгоритма
         """
-        # Initialize with the greedy solution.
+        # Инициализируем начальное значение как результат работы жадного алгоритма
         self.cur_solution, self.cur_fitness = self.initial_solution()
 
         print("Starting annealing.")
@@ -117,14 +117,14 @@ class SimAnneal(object):
 
     def visualize_routes(self, filename=None):
         """
-        Visualize the TSP route with matplotlib.
+        Визуализация маршрута
         """
         fitness = self.best_fitness + self.dist(self.best_solution[-1], self.best_solution[0])
         plotter.plot_anneal([self.best_solution], self.coords, fitness, filename)
 
     def plot_learning(self, filename=None):
         """
-        Plot the fitness through iterations.
+        Визуализация процесса отжига
         """
         plt.plot([i for i in range(len(self.fitness_list))], self.fitness_list)
         plt.ylabel('Стоимость')

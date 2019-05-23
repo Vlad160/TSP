@@ -4,6 +4,12 @@ from src.models.City import City
 
 
 def generate(size, max_len):
+    """
+    Генерация городов
+    :param size: требуемое колисество
+    :param max_len: макимальное расстояние
+    :return: cities: список сгенерированных городов, m: матрица стоимости
+    """
     max_coord = math.ceil(max_len / np.sqrt(2))
     x = np.random.uniform(1, max_coord, size)
     y = np.random.uniform(1, max_coord, size)

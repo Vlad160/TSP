@@ -1,24 +1,23 @@
 import random
 import copy
 import time
-# Original: https://github.com/maoaiz/tsp-genetic-python
+
 list_of_cities = []
 
-# probability that an individual Route will mutate
+# вероятность мутации хромосомы
 k_mut_prob = 0.30
 
 k_n_generations = 550
-# Population size of 1 generation (RoutePop)
+# Размер популяции
 k_population_size = 170
 
-# Size of the tournament selection. 
+# Размер турнира.
 tournament_size = 8
 
-# If elitism is True, the best from one generation will carried over to the next.
+# Если True, то самая лучашая хромосома 100% переходи в следующее поколение
 elitism = True
 
 
-# Route Class
 class Route(object):
 
     def __init__(self):
@@ -36,7 +35,7 @@ class Route(object):
         cities_str = ''
         for city in self.route:
             cities_str += city.name + ','
-        cities_str = cities_str[:-1]  # chops off last comma
+        cities_str = cities_str[:-1]
         if print_route:
             print('    ' + cities_str)
 
@@ -48,7 +47,6 @@ class Route(object):
 
     def is_valid_route(self):
         for city in list_of_cities:
-            # helper function defined up to
             if self.count_mult(self.route, lambda c: c.name == city.name) > 1:
                 return False
         return True
@@ -57,14 +55,12 @@ class Route(object):
         return sum(1 for v in seq if pred(v))
 
 
-# Contains a population of Route() objects
 class RoutePop(object):
 
     def __init__(self, size, initialise):
         self.rt_pop = []
         self.fittest = []
         self.size = size
-        # If we want to initialise a population.rt_pop:
         if initialise:
             for x in range(0, size):
                 new_rt = Route()
@@ -93,14 +89,11 @@ class GA(object):
             for x in range(start_pos, end_pos):
                 child_rt.route[x] = parent1.route[x]
         elif start_pos > end_pos:
-            # do it in the end-->start order
             for i in range(end_pos, start_pos):
                 child_rt.route[i] = parent1.route[i]
 
         for i in range(len(parent2.route)):
-            # if parent2 has a city that the child doesn't have yet:
             if not parent2.route[i] in child_rt.route:
-                # it puts it in the first 'None' spot and breaks out of the loop.
                 for x in range(len(child_rt.route)):
                     if child_rt.route[x] is None:
                         child_rt.route[x] = parent2.route[i]
@@ -215,6 +208,5 @@ def random_cities(cities):
     list_of_cities = []
     for city in cities:
         list_of_cities.append(city)
-    # create and run an application instance:
     app = App(n_generations=k_n_generations, pop_size=k_population_size)
     return app.best_route.route
