@@ -354,8 +354,55 @@ def compare_big_data():
             print(t / 10)
 
 
+def compare_greedy():
+    result = {
+        'Greedy': {
+            'color': 'g',
+            'title': 'Жадный',
+            'results': {
+                'x': [0],
+                'y': [0.0]
+            }
+        },
+        'Greedy_improved': {
+            'color': 'y',
+            'title': 'Жадный (модификация)',
+            'results': {
+                'x': [0],
+                'y': [0.0]
+            }
+        }
+    }
+    cities_count_list = [10, 20, 30, 40, 50]
+    for count in cities_count_list:
+        t = np.zeros(2)
+        for i in np.arange(10):
+            coords, distance_matrix = from_file('test/out-{}-{}.txt'.format(count, i))
+            _, fitness = greedy(distance_matrix, coords)
+            t[0] += fitness
+            _, fitness = greedy_improved(distance_matrix, coords)
+            t[1] += fitness
+            print('Done {}'.format(i))
+        mid = t / 10
+        result['Greedy']['results']['x'].append(count)
+        result['Greedy']['results']['y'].append(mid[0])
+        result['Greedy_improved']['results']['x'].append(count)
+        result['Greedy_improved']['results']['y'].append(mid[1])
+        print(t / 10)
+    handlers = []
+    for alg in result:
+        data = result[alg]
+        handle, = plt.plot(data['results']['x'], data['results']['y'], color=data['color'], linewidth='2',
+                           label=data['title'])
+        handlers.append(handle)
+    plt.legend(handles=handlers, loc=3)
+    plt.grid(True)
+    plt.show()
+
+
 if __name__ == '__main__':
     # draw_compare()
     # generate_big_data()
     # compare_big_data()
     # draw_compare_big_data()
+    compare_greedy()
